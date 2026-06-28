@@ -515,23 +515,25 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
           </div>
           <div className="flex items-center gap-2">
             {isAuthenticated && (
-              <button
-                onClick={handleLogout}
-                className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
-                title="Logout from admin session"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                Logout
-              </button>
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Logout from admin session"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  Logout
+                </button>
+                <button
+                  onClick={handleResetClick}
+                  className="px-3.5 py-1.5 bg-red-600/90 hover:bg-red-700 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Reset everything to hardcoded defaults"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset Template
+                </button>
+              </>
             )}
-            <button
-              onClick={handleResetClick}
-              className="px-3.5 py-1.5 bg-red-600/90 hover:bg-red-700 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
-              title="Reset everything to hardcoded defaults"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Template
-            </button>
             <button
               onClick={onClose}
               className="p-1.5 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer rounded-full"
@@ -658,6 +660,14 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                 >
                   <FileText className="w-4 h-4 flex-shrink-0" />
                   Resume Builder
+                </button>
+                <button
+                  onClick={() => setActiveTab("photography")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "photography" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <Camera className="w-4 h-4 flex-shrink-0" />
+                  Photography
                 </button>
                 <button
                   onClick={() => setActiveTab("system")}

@@ -1,22 +1,22 @@
 import React, { useState } from "react";
-import { 
-  X, 
-  Save, 
-  RotateCcw, 
-  Plus, 
-  Trash2, 
-  Edit2, 
-  User, 
-  Briefcase, 
-  AppWindow, 
-  HelpCircle, 
-  Cpu, 
-  Sliders, 
-  Sparkles, 
-  Layout, 
-  Download, 
-  Upload, 
-  Check, 
+import {
+  X,
+  Save,
+  RotateCcw,
+  Plus,
+  Trash2,
+  Edit2,
+  User,
+  Briefcase,
+  AppWindow,
+  HelpCircle,
+  Cpu,
+  Sliders,
+  Sparkles,
+  Layout,
+  Download,
+  Upload,
+  Check,
   AlertTriangle,
   FileText,
   Lock,
@@ -50,12 +50,12 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
-  
+
   // States for handling item selection & creation
   const [selectedProjectId, setSelectedProjectId] = useState<string>(localData.projects.items[0]?.id || "");
   const [selectedTimelineId, setSelectedTimelineId] = useState<string>(localData.timeline.items[0]?.id || "");
   const [selectedSkillName, setSelectedSkillName] = useState<string>(localData.about.skills[0]?.name || "");
-  
+
   // Resume specific sub-item selections
   const [selectedResumeExpId, setSelectedResumeExpId] = useState<string>(localData.resume?.experience?.[0]?.id || "");
   const [selectedResumeEduId, setSelectedResumeEduId] = useState<string>(localData.resume?.education?.[0]?.id || "");
@@ -67,15 +67,31 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const hashString = async (str: string) => {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (usernameInput.trim().toLowerCase() === "admin" && passwordInput === "admin") {
-      setIsAuthenticated(true);
-      sessionStorage.setItem("admin_authenticated", "true");
-      setLoginError(null);
-      triggerToast("Access Granted. Secure Session Established.");
-    } else {
-      setLoginError("Invalid Administrator Credentials. Access Denied.");
+    
+    try {
+      const userHash = await hashString(usernameInput.trim());
+      const passHash = await hashString(passwordInput);
+
+      if (
+        userHash === "07b36ee8e6a81d895327eeda6cfdcc5416a0ccd38ee94e2080076827ecb85bf4" && 
+        passHash === "4716616fbf7a3f1e8f24beeebc3070d33db57bb9eb59b663ee56d58a224e035e"
+      ) {
+        setIsAuthenticated(true);
+        sessionStorage.setItem("admin_authenticated", "true");
+        setLoginError(null);
+        triggerToast("Access Granted. Secure Session Established.");
+      } else {
+        setLoginError("Invalid Administrator Credentials. Access Denied.");
+      }
+    } catch (err) {
+      setLoginError("Authentication error. Secure context required.");
     }
   };
 
@@ -139,7 +155,7 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
 
   // CRUD for Projects
   const currentProject = localData.projects.items.find(p => p.id === selectedProjectId);
-  
+
   const handleProjectChange = (field: keyof Project, value: any) => {
     if (!currentProject) return;
     const updatedItems = localData.projects.items.map(p => {
@@ -483,7 +499,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6 bg-black/75 backdrop-blur-sm animate-fade-in text-left select-text overflow-hidden">
       <div className="admin-portal-modern w-full h-full md:max-w-6xl md:h-[90vh] bg-bg-theme border border-border-theme flex flex-col shadow-2xl relative rounded-2xl overflow-hidden">
-        
+
         {/* Banner Headers */}
         <div className="bg-secondary-theme text-white border-b border-border-theme/40 p-4 flex justify-between items-center select-none flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -497,7 +513,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
           </div>
           <div className="flex items-center gap-2">
             {isAuthenticated && (
-              <button 
+              <button
                 onClick={handleLogout}
                 className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
                 title="Logout from admin session"
@@ -506,7 +522,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                 Logout
               </button>
             )}
-            <button 
+            <button
               onClick={handleResetClick}
               className="px-3.5 py-1.5 bg-red-600/90 hover:bg-red-700 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
               title="Reset everything to hardcoded defaults"
@@ -514,7 +530,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
               <RotateCcw className="w-3.5 h-3.5" />
               Reset Template
             </button>
-            <button 
+            <button
               onClick={onClose}
               className="p-1.5 border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer rounded-full"
               aria-label="Close portal"
@@ -554,7 +570,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text-variant">
                       <User className="w-4 h-4" />
                     </span>
-                    <input 
+                    <input
                       type="text"
                       required
                       value={usernameInput}
@@ -573,7 +589,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text-variant">
                       <Lock className="w-4 h-4" />
                     </span>
-                    <input 
+                    <input
                       type="password"
                       required
                       value={passwordInput}
@@ -585,7 +601,7 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                 </div>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 className="w-full py-3 bg-primary-theme hover:bg-opacity-95 text-on-primary-theme font-sans text-xs font-bold tracking-widest flex items-center justify-center gap-2 transition-all cursor-pointer rounded-full"
               >
@@ -593,1131 +609,1113 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                 Authorize Session
               </button>
 
-              <div className="pt-3 border-t border-dashed border-text-theme/30 text-center">
-                <p className="font-sans text-[10px] font-medium text-text-variant leading-relaxed">
-                  💡 Default Dev Credentials:<br />
-                  <span className="font-bold text-secondary-theme">Username: <span className="underline">admin</span></span> | <span className="font-bold text-secondary-theme">Password: <span className="underline">admin</span></span>
-                </p>
-              </div>
             </form>
           </div>
         ) : (
           <>
             <div className="flex-1 flex overflow-hidden flex-col md:flex-row">
-          
-          {/* Admin Navigation Left Bar */}
-          <div className="admin-sidebar w-full md:w-56 bg-surface-theme border-b md:border-b-0 md:border-r border-border-theme/40 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible select-none flex-shrink-0 p-3 gap-1.5">
-            <button
-              onClick={() => setActiveTab("hero")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "hero" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <Layout className="w-4 h-4 flex-shrink-0" />
-              Hero Section
-            </button>
-            <button
-              onClick={() => setActiveTab("about")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "about" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <User className="w-4 h-4 flex-shrink-0" />
-              About &amp; Skills
-            </button>
-            <button
-              onClick={() => setActiveTab("projects")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "projects" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <AppWindow className="w-4 h-4 flex-shrink-0" />
-              Selected Works
-            </button>
-            <button
-              onClick={() => setActiveTab("timeline")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "timeline" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <Briefcase className="w-4 h-4 flex-shrink-0" />
-              Experience Log
-            </button>
-            <button
-              onClick={() => setActiveTab("resume")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "resume" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <FileText className="w-4 h-4 flex-shrink-0" />
-              Resume Builder
-            </button>
-            <button
-              onClick={() => setActiveTab("system")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "system" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <Cpu className="w-4 h-4 flex-shrink-0" />
-              Template IO
-            </button>
-            <button
-              onClick={() => setActiveTab("stats")}
-              className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${
-                activeTab === "stats" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
-              }`}
-            >
-              <BarChart3 className="w-4 h-4 flex-shrink-0" />
-              Visitor Analytics
-            </button>
-          </div>
 
-          {/* Admin Editor Panel Right Side */}
-          <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
-            
-            {/* HERO TAB */}
-            {activeTab === "hero" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
-                  Edit Hero Section Presets
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Logo Signature Text</label>
-                    <input 
-                      type="text"
-                      value={localData.hero.logoName}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        hero: { ...localData.hero, logoName: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Main Bold Headline</label>
-                    <input 
-                      type="text"
-                      value={localData.hero.headline}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        hero: { ...localData.hero, headline: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <label className="block font-sans text-xs font-bold  text-text-theme">Editorial Subtitle / Overview Description</label>
-                  <textarea 
-                    value={localData.hero.description}
-                    onChange={(e) => setLocalData({
-                      ...localData,
-                      hero: { ...localData.hero, description: e.target.value }
-                    })}
-                    className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme h-28 resize-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Primary Button Action Text</label>
-                    <input 
-                      type="text"
-                      value={localData.hero.buttonText1}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        hero: { ...localData.hero, buttonText1: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Secondary Button Action Text</label>
-                    <input 
-                      type="text"
-                      value={localData.hero.buttonText2}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        hero: { ...localData.hero, buttonText2: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                </div>
+              {/* Admin Navigation Left Bar */}
+              <div className="admin-sidebar w-full md:w-56 bg-surface-theme border-b md:border-b-0 md:border-r border-border-theme/40 flex flex-row md:flex-col overflow-x-auto md:overflow-x-visible select-none flex-shrink-0 p-3 gap-1.5">
+                <button
+                  onClick={() => setActiveTab("hero")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "hero" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <Layout className="w-4 h-4 flex-shrink-0" />
+                  Hero Section
+                </button>
+                <button
+                  onClick={() => setActiveTab("about")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "about" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <User className="w-4 h-4 flex-shrink-0" />
+                  About &amp; Skills
+                </button>
+                <button
+                  onClick={() => setActiveTab("projects")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "projects" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <AppWindow className="w-4 h-4 flex-shrink-0" />
+                  Selected Works
+                </button>
+                <button
+                  onClick={() => setActiveTab("timeline")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "timeline" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <Briefcase className="w-4 h-4 flex-shrink-0" />
+                  Experience Log
+                </button>
+                <button
+                  onClick={() => setActiveTab("resume")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "resume" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <FileText className="w-4 h-4 flex-shrink-0" />
+                  Resume Builder
+                </button>
+                <button
+                  onClick={() => setActiveTab("system")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "system" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <Cpu className="w-4 h-4 flex-shrink-0" />
+                  Template IO
+                </button>
+                <button
+                  onClick={() => setActiveTab("stats")}
+                  className={`flex-1 md:flex-none p-3 font-sans text-xs font-semibold  tracking-wider text-left rounded-xl flex items-center gap-2.5 transition-all duration-200 cursor-pointer ${activeTab === "stats" ? "bg-secondary-theme text-white border-transparent shadow-sm" : "hover:bg-surface-container-theme text-text-theme border-transparent"
+                    }`}
+                >
+                  <BarChart3 className="w-4 h-4 flex-shrink-0" />
+                  Visitor Analytics
+                </button>
               </div>
-            )}
 
-            {/* ABOUT & SKILLS TAB */}
-            {activeTab === "about" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
-                  Edit Approach Paragraphs &amp; Skills
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Section Heading Title</label>
-                    <input 
-                      type="text"
-                      value={localData.about.title}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        about: { ...localData.about, title: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                </div>
+              {/* Admin Editor Panel Right Side */}
+              <div className="flex-1 p-6 md:p-8 overflow-y-auto space-y-6">
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Approach Paragraph 1 (Main Profile Text)</label>
-                    <textarea 
-                      value={localData.about.paragraph1}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        about: { ...localData.about, paragraph1: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans text-sm text-text-theme h-28"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Approach Paragraph 2 (Quote / Philosophy)</label>
-                    <textarea 
-                      value={localData.about.paragraph2}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        about: { ...localData.about, paragraph2: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans text-sm text-text-theme h-28"
-                    />
-                  </div>
-                </div>
-
-                {/* SKILLS CRUDS */}
-                <div className="pt-4 border-t-2 border-text-theme space-y-4">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h4 className="font-sans text-xs font-bold  tracking-wider text-text-theme">
-                      Manage Arsenal Skill Matrix
-                    </h4>
-                    <button 
-                      onClick={handleAddNewSkill}
-                      className="px-3 py-1 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Skill
-                    </button>
-                  </div>
-
-                  <div className="flex flex-wrap gap-1.5 p-3 bg-surface-theme border border-border-theme/40 max-h-24 overflow-y-auto">
-                    {localData.about.skills.map((skill) => (
-                      <div 
-                        key={skill.name} 
-                        className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${
-                          selectedSkillName === skill.name ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
-                        }`}
-                      >
-                        <button 
-                          onClick={() => setSelectedSkillName(skill.name)}
-                          className="px-2 py-1 cursor-pointer"
-                        >
-                          {skill.name}
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteSkill(skill.name)}
-                          className="px-1.5 py-1 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer"
-                          title="Delete skill"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {currentSkill && (
-                    <div className="p-4 border border-border-theme/40 bg-surface-theme grid grid-cols-1 md:grid-cols-3 gap-4 animate-[fadeInUp_0.15s_ease_forwards]">
+                {/* HERO TAB */}
+                {activeTab === "hero" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
+                      Edit Hero Section Presets
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Skill Name</label>
-                        <input 
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Logo Signature Text</label>
+                        <input
                           type="text"
-                          value={currentSkill.name}
-                          onChange={(e) => {
-                            const oldName = currentSkill.name;
-                            const newName = e.target.value;
-                            handleSkillChange("name", newName);
-                            setSelectedSkillName(newName);
-                          }}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-bold text-text-theme "
+                          value={localData.hero.logoName}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            hero: { ...localData.hero, logoName: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
                         />
                       </div>
-
                       <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Category Group</label>
-                        <select 
-                          value={currentSkill.category}
-                          onChange={(e) => handleSkillChange("category", e.target.value as any)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-bold text-text-theme "
-                        >
-                          <option value="frontend">Frontend Architecture</option>
-                          <option value="backend">Backend &amp; Systems</option>
-                          <option value="tools">Tools &amp; Technologies</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Badge Text</label>
-                        <input 
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Main Bold Headline</label>
+                        <input
                           type="text"
-                          value={currentSkill.badge}
-                          onChange={(e) => handleSkillChange("badge", e.target.value)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-bold text-text-theme "
-                        />
-                      </div>
-
-                      <div className="space-y-2 md:col-span-1">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Proficiency Metric ({currentSkill.proficiency}%)</label>
-                        <input 
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={currentSkill.proficiency}
-                          onChange={(e) => handleSkillChange("proficiency", parseInt(e.target.value))}
-                          className="w-full accent-secondary-theme cursor-pointer"
-                        />
-                      </div>
-
-                      <div className="space-y-2 md:col-span-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Experience / Highlight Summary Description</label>
-                        <input 
-                          type="text"
-                          value={currentSkill.description}
-                          onChange={(e) => handleSkillChange("description", e.target.value)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-medium text-text-theme"
+                          value={localData.hero.headline}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            hero: { ...localData.hero, headline: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
                         />
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
 
-            {/* PROJECTS TAB */}
-            {activeTab === "projects" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
-                  Edit Selected Works Grid
-                </h3>
+                    <div className="space-y-2">
+                      <label className="block font-sans text-xs font-bold  text-text-theme">Editorial Subtitle / Overview Description</label>
+                      <textarea
+                        value={localData.hero.description}
+                        onChange={(e) => setLocalData({
+                          ...localData,
+                          hero: { ...localData.hero, description: e.target.value }
+                        })}
+                        className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme h-28 resize-none"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Section Heading Title</label>
-                    <input 
-                      type="text"
-                      value={localData.projects.title}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        projects: { ...localData.projects, title: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2 space-y-4">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h4 className="font-sans text-xs font-bold  tracking-wider text-text-theme">
-                      Select Project Template to Edit
-                    </h4>
-                    <button 
-                      onClick={handleAddNewProject}
-                      className="px-3 py-1 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Project
-                    </button>
-                  </div>
-
-                  {/* Selector list */}
-                  <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
-                    {localData.projects.items.map((proj) => (
-                      <div 
-                        key={proj.id} 
-                        className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${
-                          selectedProjectId === proj.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
-                        }`}
-                      >
-                        <button 
-                          onClick={() => setSelectedProjectId(proj.id)}
-                          className="px-3 py-1.5 cursor-pointer"
-                        >
-                          {proj.title} ({proj.year})
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteProject(proj.id)}
-                          className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer"
-                          title="Delete Project"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Selected Project fields */}
-                  {currentProject && (
-                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 animate-[fadeInUp_0.15s_ease_forwards]">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Project Title</label>
-                          <input 
-                            type="text"
-                            value={currentProject.title}
-                            onChange={(e) => handleProjectChange("title", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Year / Period</label>
-                          <input 
-                            type="text"
-                            value={currentProject.year}
-                            onChange={(e) => handleProjectChange("year", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Tech Tags (Comma separated)</label>
-                          <input 
-                            type="text"
-                            value={currentProject.tech.join(", ")}
-                            onChange={(e) => handleProjectChange("tech", e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
-                          />
-                        </div>
-                      </div>
-
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Aesthetic Subtitle (Short descriptor for card)</label>
-                        <input 
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Primary Button Action Text</label>
+                        <input
                           type="text"
-                          value={currentProject.subtitle}
-                          onChange={(e) => handleProjectChange("subtitle", e.target.value)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-semibold text-xs text-text-theme"
+                          value={localData.hero.buttonText1}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            hero: { ...localData.hero, buttonText1: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
                         />
                       </div>
-
                       <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Detailed Description (For detailed architecture modal)</label>
-                        <textarea 
-                          value={currentProject.description}
-                          onChange={(e) => handleProjectChange("description", e.target.value)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-20"
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Secondary Button Action Text</label>
+                        <input
+                          type="text"
+                          value={localData.hero.buttonText2}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            hero: { ...localData.hero, buttonText2: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
                         />
                       </div>
+                    </div>
+                  </div>
+                )}
 
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2 md:col-span-1">
-                          <label className="block font-sans text-[10px] font-bold text-text-theme">Project Thumbnail Image URL</label>
-                          <div className="flex gap-2.5 items-center mt-1">
-                            {currentProject.imageUrl && (
-                              <img 
-                                src={currentProject.imageUrl} 
-                                alt="Thumbnail Preview" 
-                                className="w-10 h-10 object-cover rounded-lg border border-border-theme/40 flex-shrink-0"
-                              />
-                            )}
-                            <input 
+                {/* ABOUT & SKILLS TAB */}
+                {activeTab === "about" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
+                      Edit Approach Paragraphs &amp; Skills
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Section Heading Title</label>
+                        <input
+                          type="text"
+                          value={localData.about.title}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            about: { ...localData.about, title: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Approach Paragraph 1 (Main Profile Text)</label>
+                        <textarea
+                          value={localData.about.paragraph1}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            about: { ...localData.about, paragraph1: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans text-sm text-text-theme h-28"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Approach Paragraph 2 (Quote / Philosophy)</label>
+                        <textarea
+                          value={localData.about.paragraph2}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            about: { ...localData.about, paragraph2: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans text-sm text-text-theme h-28"
+                        />
+                      </div>
+                    </div>
+
+                    {/* SKILLS CRUDS */}
+                    <div className="pt-4 border-t-2 border-text-theme space-y-4">
+                      <div className="flex justify-between items-center flex-wrap gap-2">
+                        <h4 className="font-sans text-xs font-bold  tracking-wider text-text-theme">
+                          Manage Arsenal Skill Matrix
+                        </h4>
+                        <button
+                          onClick={handleAddNewSkill}
+                          className="px-3 py-1 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          Add Skill
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1.5 p-3 bg-surface-theme border border-border-theme/40 max-h-24 overflow-y-auto">
+                        {localData.about.skills.map((skill) => (
+                          <div
+                            key={skill.name}
+                            className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${selectedSkillName === skill.name ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
+                              }`}
+                          >
+                            <button
+                              onClick={() => setSelectedSkillName(skill.name)}
+                              className="px-2 py-1 cursor-pointer"
+                            >
+                              {skill.name}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSkill(skill.name)}
+                              className="px-1.5 py-1 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer"
+                              title="Delete skill"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {currentSkill && (
+                        <div className="p-4 border border-border-theme/40 bg-surface-theme grid grid-cols-1 md:grid-cols-3 gap-4 animate-[fadeInUp_0.15s_ease_forwards]">
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Skill Name</label>
+                            <input
                               type="text"
-                              value={currentProject.imageUrl}
-                              onChange={(e) => handleProjectChange("imageUrl", e.target.value)}
-                              placeholder="Thumbnail image URL..."
-                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                              value={currentSkill.name}
+                              onChange={(e) => {
+                                const oldName = currentSkill.name;
+                                const newName = e.target.value;
+                                handleSkillChange("name", newName);
+                                setSelectedSkillName(newName);
+                              }}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-bold text-text-theme "
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Category Group</label>
+                            <select
+                              value={currentSkill.category}
+                              onChange={(e) => handleSkillChange("category", e.target.value as any)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-bold text-text-theme "
+                            >
+                              <option value="frontend">Frontend Architecture</option>
+                              <option value="backend">Backend &amp; Systems</option>
+                              <option value="tools">Tools &amp; Technologies</option>
+                            </select>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Badge Text</label>
+                            <input
+                              type="text"
+                              value={currentSkill.badge}
+                              onChange={(e) => handleSkillChange("badge", e.target.value)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-bold text-text-theme "
+                            />
+                          </div>
+
+                          <div className="space-y-2 md:col-span-1">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Proficiency Metric ({currentSkill.proficiency}%)</label>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              value={currentSkill.proficiency}
+                              onChange={(e) => handleSkillChange("proficiency", parseInt(e.target.value))}
+                              className="w-full accent-secondary-theme cursor-pointer"
+                            />
+                          </div>
+
+                          <div className="space-y-2 md:col-span-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Experience / Highlight Summary Description</label>
+                            <input
+                              type="text"
+                              value={currentSkill.description}
+                              onChange={(e) => handleSkillChange("description", e.target.value)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs font-medium text-text-theme"
                             />
                           </div>
                         </div>
-                        <div className="space-y-2 md:col-span-1">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Live App / Demo Link</label>
-                          <input 
-                            type="text"
-                            value={currentProject.liveUrl}
-                            onChange={(e) => handleProjectChange("liveUrl", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
-                          />
-                        </div>
-                        <div className="space-y-2 md:col-span-1">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">GitHub Repository Link</label>
-                          <input 
-                            type="text"
-                            value={currentProject.githubUrl}
-                            onChange={(e) => handleProjectChange("githubUrl", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
-                          />
-                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* PROJECTS TAB */}
+                {activeTab === "projects" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
+                      Edit Selected Works Grid
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Section Heading Title</label>
+                        <input
+                          type="text"
+                          value={localData.projects.title}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            projects: { ...localData.projects, title: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
+                        />
                       </div>
+                    </div>
+
+                    <div className="pt-2 space-y-4">
+                      <div className="flex justify-between items-center flex-wrap gap-2">
+                        <h4 className="font-sans text-xs font-bold  tracking-wider text-text-theme">
+                          Select Project Template to Edit
+                        </h4>
+                        <button
+                          onClick={handleAddNewProject}
+                          className="px-3 py-1 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          Add Project
+                        </button>
+                      </div>
+
+                      {/* Selector list */}
+                      <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
+                        {localData.projects.items.map((proj) => (
+                          <div
+                            key={proj.id}
+                            className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${selectedProjectId === proj.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
+                              }`}
+                          >
+                            <button
+                              onClick={() => setSelectedProjectId(proj.id)}
+                              className="px-3 py-1.5 cursor-pointer"
+                            >
+                              {proj.title} ({proj.year})
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProject(proj.id)}
+                              className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer"
+                              title="Delete Project"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Selected Project fields */}
+                      {currentProject && (
+                        <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 animate-[fadeInUp_0.15s_ease_forwards]">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Project Title</label>
+                              <input
+                                type="text"
+                                value={currentProject.title}
+                                onChange={(e) => handleProjectChange("title", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Year / Period</label>
+                              <input
+                                type="text"
+                                value={currentProject.year}
+                                onChange={(e) => handleProjectChange("year", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Tech Tags (Comma separated)</label>
+                              <input
+                                type="text"
+                                value={currentProject.tech.join(", ")}
+                                onChange={(e) => handleProjectChange("tech", e.target.value.split(",").map(t => t.trim()).filter(Boolean))}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Aesthetic Subtitle (Short descriptor for card)</label>
+                            <input
+                              type="text"
+                              value={currentProject.subtitle}
+                              onChange={(e) => handleProjectChange("subtitle", e.target.value)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-semibold text-xs text-text-theme"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Detailed Description (For detailed architecture modal)</label>
+                            <textarea
+                              value={currentProject.description}
+                              onChange={(e) => handleProjectChange("description", e.target.value)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-20"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2 md:col-span-1">
+                              <label className="block font-sans text-[10px] font-bold text-text-theme">Project Thumbnail Image URL</label>
+                              <div className="flex gap-2.5 items-center mt-1">
+                                {currentProject.imageUrl && (
+                                  <img
+                                    src={currentProject.imageUrl}
+                                    alt="Thumbnail Preview"
+                                    className="w-10 h-10 object-cover rounded-lg border border-border-theme/40 flex-shrink-0"
+                                  />
+                                )}
+                                <input
+                                  type="text"
+                                  value={currentProject.imageUrl}
+                                  onChange={(e) => handleProjectChange("imageUrl", e.target.value)}
+                                  placeholder="Thumbnail image URL..."
+                                  className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                                />
+                              </div>
+                            </div>
+                            <div className="space-y-2 md:col-span-1">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Live App / Demo Link</label>
+                              <input
+                                type="text"
+                                value={currentProject.liveUrl}
+                                onChange={(e) => handleProjectChange("liveUrl", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                              />
+                            </div>
+                            <div className="space-y-2 md:col-span-1">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">GitHub Repository Link</label>
+                              <input
+                                type="text"
+                                value={currentProject.githubUrl}
+                                onChange={(e) => handleProjectChange("githubUrl", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Engineering Challenges Faced</label>
+                              <textarea
+                                value={currentProject.challenges}
+                                onChange={(e) => handleProjectChange("challenges", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Key Milestones list (One item per line)</label>
+                              <textarea
+                                value={currentProject.highlights.join("\n")}
+                                onChange={(e) => handleProjectChange("highlights", e.target.value.split("\n").map(h => h.trim()).filter(Boolean))}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16"
+                                placeholder="Enter one highlight per line"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* TIMELINE TAB */}
+                {activeTab === "timeline" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
+                      Edit Experience &amp; Education Log
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold  text-text-theme">Section Heading Title</label>
+                        <input
+                          type="text"
+                          value={localData.timeline.title}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            timeline: { ...localData.timeline, title: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-2 space-y-4">
+                      <div className="flex justify-between items-center flex-wrap gap-2">
+                        <h4 className="font-sans text-xs font-bold  tracking-wider text-text-theme">
+                          Select Log Item to Edit
+                        </h4>
+                        <button
+                          onClick={handleAddNewTimeline}
+                          className="px-3 py-1 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          Add Event
+                        </button>
+                      </div>
+
+                      {/* Selector list */}
+                      <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
+                        {localData.timeline.items.map((item) => (
+                          <div
+                            key={item.id}
+                            className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${selectedTimelineId === item.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
+                              }`}
+                          >
+                            <button
+                              onClick={() => setSelectedTimelineId(item.id)}
+                              className="px-3 py-1.5 cursor-pointer"
+                            >
+                              {item.title} ({item.period})
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTimeline(item.id)}
+                              className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer"
+                              title="Delete Timeline Event"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Selected timeline item fields */}
+                      {currentTimeline && (
+                        <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 animate-[fadeInUp_0.15s_ease_forwards]">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Role Title / Degree</label>
+                              <input
+                                type="text"
+                                value={currentTimeline.title}
+                                onChange={(e) => handleTimelineChange("title", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Company / Institution Name</label>
+                              <input
+                                type="text"
+                                value={currentTimeline.subtitle}
+                                onChange={(e) => handleTimelineChange("subtitle", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme "
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="block font-sans text-[10px] font-bold  text-text-theme">Duration Period</label>
+                              <input
+                                type="text"
+                                value={currentTimeline.period}
+                                onChange={(e) => handleTimelineChange("period", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Brief Summary Description</label>
+                            <textarea
+                              value={currentTimeline.description}
+                              onChange={(e) => handleTimelineChange("description", e.target.value)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block font-sans text-[10px] font-bold  text-text-theme">Key Achievements / Contributions list (One per line)</label>
+                            <textarea
+                              value={currentTimeline.achievements.join("\n")}
+                              onChange={(e) => handleTimelineChange("achievements", e.target.value.split("\n").map(a => a.trim()).filter(Boolean))}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-24"
+                              placeholder="Enter one achievement per line"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* RESUME BUILDER SYSTEM */}
+                {activeTab === "resume" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <div className="flex justify-between items-center border-b-2 border-text-theme pb-2 flex-wrap gap-4">
+                      <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-secondary-theme" />
+                        Curriculum Vitae Resume Editor
+                      </h3>
+                      <button
+                        onClick={handleDownloadFromAdmin}
+                        className="px-4 py-2 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer rounded-xl"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download formatted Resume
+                      </button>
+                    </div>
+
+                    {/* Personal Information */}
+                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
+                      <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">1. Contact &amp; Header Details</h4>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Engineering Challenges Faced</label>
-                          <textarea 
-                            value={currentProject.challenges}
-                            onChange={(e) => handleProjectChange("challenges", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16"
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Full Name</label>
+                          <input
+                            type="text"
+                            value={localData.resume?.name || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: { ...localData.resume, name: e.target.value }
+                            })}
+                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold text-xs text-text-theme rounded-xl"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Key Milestones list (One item per line)</label>
-                          <textarea 
-                            value={currentProject.highlights.join("\n")}
-                            onChange={(e) => handleProjectChange("highlights", e.target.value.split("\n").map(h => h.trim()).filter(Boolean))}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16"
-                            placeholder="Enter one highlight per line"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* TIMELINE TAB */}
-            {activeTab === "timeline" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
-                  Edit Experience &amp; Education Log
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="block font-sans text-xs font-bold  text-text-theme">Section Heading Title</label>
-                    <input 
-                      type="text"
-                      value={localData.timeline.title}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        timeline: { ...localData.timeline, title: e.target.value }
-                      })}
-                      className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-2 space-y-4">
-                  <div className="flex justify-between items-center flex-wrap gap-2">
-                    <h4 className="font-sans text-xs font-bold  tracking-wider text-text-theme">
-                      Select Log Item to Edit
-                    </h4>
-                    <button 
-                      onClick={handleAddNewTimeline}
-                      className="px-3 py-1 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add Event
-                    </button>
-                  </div>
-
-                  {/* Selector list */}
-                  <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
-                    {localData.timeline.items.map((item) => (
-                      <div 
-                        key={item.id} 
-                        className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${
-                          selectedTimelineId === item.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
-                        }`}
-                      >
-                        <button 
-                          onClick={() => setSelectedTimelineId(item.id)}
-                          className="px-3 py-1.5 cursor-pointer"
-                        >
-                          {item.title} ({item.period})
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteTimeline(item.id)}
-                          className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer"
-                          title="Delete Timeline Event"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Selected timeline item fields */}
-                  {currentTimeline && (
-                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 animate-[fadeInUp_0.15s_ease_forwards]">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Role Title / Degree</label>
-                          <input 
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Professional Title</label>
+                          <input
                             type="text"
-                            value={currentTimeline.title}
-                            onChange={(e) => handleTimelineChange("title", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme"
+                            value={localData.resume?.title || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: { ...localData.resume, title: e.target.value }
+                            })}
+                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold text-xs text-text-theme  rounded-xl"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Company / Institution Name</label>
-                          <input 
-                            type="text"
-                            value={currentTimeline.subtitle}
-                            onChange={(e) => handleTimelineChange("subtitle", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme "
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Email Address</label>
+                          <input
+                            type="email"
+                            value={localData.resume?.email || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: { ...localData.resume, email: e.target.value }
+                            })}
+                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
                           />
                         </div>
                         <div className="space-y-2">
-                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Duration Period</label>
-                          <input 
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Phone Number</label>
+                          <input
                             type="text"
-                            value={currentTimeline.period}
-                            onChange={(e) => handleTimelineChange("period", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Brief Summary Description</label>
-                        <textarea 
-                          value={currentTimeline.description}
-                          onChange={(e) => handleTimelineChange("description", e.target.value)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Key Achievements / Contributions list (One per line)</label>
-                        <textarea 
-                          value={currentTimeline.achievements.join("\n")}
-                          onChange={(e) => handleTimelineChange("achievements", e.target.value.split("\n").map(a => a.trim()).filter(Boolean))}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-24"
-                          placeholder="Enter one achievement per line"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* RESUME BUILDER SYSTEM */}
-            {activeTab === "resume" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <div className="flex justify-between items-center border-b-2 border-text-theme pb-2 flex-wrap gap-4">
-                  <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-secondary-theme" />
-                    Curriculum Vitae Resume Editor
-                  </h3>
-                  <button
-                    onClick={handleDownloadFromAdmin}
-                    className="px-4 py-2 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center gap-1.5 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer rounded-xl"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Download formatted Resume
-                  </button>
-                </div>
-
-                {/* Personal Information */}
-                <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
-                  <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">1. Contact &amp; Header Details</h4>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Full Name</label>
-                      <input 
-                        type="text"
-                        value={localData.resume?.name || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: { ...localData.resume, name: e.target.value }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold text-xs text-text-theme rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Professional Title</label>
-                      <input 
-                        type="text"
-                        value={localData.resume?.title || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: { ...localData.resume, title: e.target.value }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold text-xs text-text-theme  rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Email Address</label>
-                      <input 
-                        type="email"
-                        value={localData.resume?.email || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: { ...localData.resume, email: e.target.value }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Phone Number</label>
-                      <input 
-                        type="text"
-                        value={localData.resume?.phone || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: { ...localData.resume, phone: e.target.value }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block font-sans text-[10px] font-bold  text-text-theme">Location &amp; Work Preference</label>
-                    <input 
-                      type="text"
-                      value={localData.resume?.location || ""}
-                      onChange={(e) => setLocalData({
-                        ...localData,
-                        resume: { ...localData.resume, location: e.target.value }
-                      })}
-                      className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
-                      placeholder="e.g. San Francisco, CA (Open to Remote)"
-                    />
-                  </div>
-                </div>
-
-                {/* Profile statement */}
-                <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-2 shadow-md ">
-                  <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">2. Professional Profile Paragraph</h4>
-                  <textarea 
-                    value={localData.resume?.profile || ""}
-                    onChange={(e) => setLocalData({
-                      ...localData,
-                      resume: { ...localData.resume, profile: e.target.value }
-                    })}
-                    className="w-full p-2.5 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-24 leading-relaxed rounded-xl"
-                  />
-                </div>
-
-                {/* Work Experience Builder */}
-                <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
-                  <div className="flex justify-between items-center border-b border-text-theme pb-2 flex-wrap gap-2">
-                    <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">3. Work History Events ({localData.resume?.experience?.length || 0})</h4>
-                    <button 
-                      onClick={handleAddNewResumeExp}
-                      className="px-2.5 py-1 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 text-[10px] font-sans font-bold  flex items-center gap-1 hover:-translate-y-0.5 hover:-translate-y-0.5 transition-all cursor-pointer shadow-sm active:translate-y-0 active:translate-y-0 rounded-xl"
-                    >
-                      <Plus className="w-3 h-3" />
-                      Add Work Event
-                    </button>
-                  </div>
-
-                  {/* Selector list */}
-                  <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
-                    {(localData.resume?.experience || []).map((exp) => (
-                      <div 
-                        key={exp.id} 
-                        className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${
-                          selectedResumeExpId === exp.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
-                        }`}
-                      >
-                        <button 
-                          onClick={() => setSelectedResumeExpId(exp.id)}
-                          className="px-3 py-1.5 cursor-pointer"
-                        >
-                          {exp.company}
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteResumeExp(exp.id)}
-                          className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer flex items-center justify-center"
-                          title="Delete Resume Experience"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Selected experience fields */}
-                  {currentResumeExp && (
-                    <div className="p-3 border border-border-theme/40 bg-bg-theme space-y-3 animate-[fadeInUp_0.1s_ease_forwards]">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div className="space-y-1">
-                          <label className="block font-sans text-[9px] font-bold  text-text-theme">Job Role Title</label>
-                          <input 
-                            type="text"
-                            value={currentResumeExp.title}
-                            onChange={(e) => handleResumeExpChange("title", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="block font-sans text-[9px] font-bold  text-text-theme">Company Name</label>
-                          <input 
-                            type="text"
-                            value={currentResumeExp.company}
-                            onChange={(e) => handleResumeExpChange("company", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="block font-sans text-[9px] font-bold  text-text-theme">Employment Period</label>
-                          <input 
-                            type="text"
-                            value={currentResumeExp.period}
-                            onChange={(e) => handleResumeExpChange("period", e.target.value)}
+                            value={localData.resume?.phone || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: { ...localData.resume, phone: e.target.value }
+                            })}
                             className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
                           />
                         </div>
                       </div>
 
-                      <div className="space-y-1">
-                        <label className="block font-sans text-[9px] font-bold  text-text-theme">Key Contributions (One bullet point per line)</label>
-                        <textarea 
-                          value={currentResumeExp.bullets.join("\n")}
-                          onChange={(e) => handleResumeExpChange("bullets", e.target.value.split("\n").map(b => b.trim()).filter(Boolean))}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-24 rounded-xl"
-                          placeholder="e.g. Developed high-performance modular React web app interface."
+                      <div className="space-y-2">
+                        <label className="block font-sans text-[10px] font-bold  text-text-theme">Location &amp; Work Preference</label>
+                        <input
+                          type="text"
+                          value={localData.resume?.location || ""}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            resume: { ...localData.resume, location: e.target.value }
+                          })}
+                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
+                          placeholder="e.g. San Francisco, CA (Open to Remote)"
                         />
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Education Builder */}
-                <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
-                  <div className="flex justify-between items-center border-b border-text-theme pb-2 flex-wrap gap-2">
-                    <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">4. Education Certifications ({localData.resume?.education?.length || 0})</h4>
-                    <button 
-                      onClick={handleAddNewResumeEdu}
-                      className="px-2.5 py-1 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 text-[10px] font-sans font-bold  flex items-center gap-1 hover:-translate-y-0.5 hover:-translate-y-0.5 transition-all cursor-pointer shadow-sm active:translate-y-0 active:translate-y-0 rounded-xl"
-                    >
-                      <Plus className="w-3 h-3" />
-                      Add Education
-                    </button>
-                  </div>
+                    {/* Profile statement */}
+                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-2 shadow-md ">
+                      <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">2. Professional Profile Paragraph</h4>
+                      <textarea
+                        value={localData.resume?.profile || ""}
+                        onChange={(e) => setLocalData({
+                          ...localData,
+                          resume: { ...localData.resume, profile: e.target.value }
+                        })}
+                        className="w-full p-2.5 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-24 leading-relaxed rounded-xl"
+                      />
+                    </div>
 
-                  {/* Selector list */}
-                  <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
-                    {(localData.resume?.education || []).map((edu) => (
-                      <div 
-                        key={edu.id} 
-                        className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${
-                          selectedResumeEduId === edu.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
-                        }`}
-                      >
-                        <button 
-                          onClick={() => setSelectedResumeEduId(edu.id)}
-                          className="px-3 py-1.5 cursor-pointer"
+                    {/* Work Experience Builder */}
+                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
+                      <div className="flex justify-between items-center border-b border-text-theme pb-2 flex-wrap gap-2">
+                        <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">3. Work History Events ({localData.resume?.experience?.length || 0})</h4>
+                        <button
+                          onClick={handleAddNewResumeExp}
+                          className="px-2.5 py-1 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 text-[10px] font-sans font-bold  flex items-center gap-1 hover:-translate-y-0.5 hover:-translate-y-0.5 transition-all cursor-pointer shadow-sm active:translate-y-0 active:translate-y-0 rounded-xl"
                         >
-                          {edu.school}
-                        </button>
-                        <button 
-                          onClick={() => handleDeleteResumeEdu(edu.id)}
-                          className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer flex items-center justify-center"
-                          title="Delete Resume Education"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Plus className="w-3 h-3" />
+                          Add Work Event
                         </button>
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Selected education fields */}
-                  {currentResumeEdu && (
-                    <div className="p-3 border border-border-theme/40 bg-bg-theme space-y-3 animate-[fadeInUp_0.1s_ease_forwards]">
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {/* Selector list */}
+                      <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
+                        {(localData.resume?.experience || []).map((exp) => (
+                          <div
+                            key={exp.id}
+                            className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${selectedResumeExpId === exp.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
+                              }`}
+                          >
+                            <button
+                              onClick={() => setSelectedResumeExpId(exp.id)}
+                              className="px-3 py-1.5 cursor-pointer"
+                            >
+                              {exp.company}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteResumeExp(exp.id)}
+                              className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer flex items-center justify-center"
+                              title="Delete Resume Experience"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Selected experience fields */}
+                      {currentResumeExp && (
+                        <div className="p-3 border border-border-theme/40 bg-bg-theme space-y-3 animate-[fadeInUp_0.1s_ease_forwards]">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="space-y-1">
+                              <label className="block font-sans text-[9px] font-bold  text-text-theme">Job Role Title</label>
+                              <input
+                                type="text"
+                                value={currentResumeExp.title}
+                                onChange={(e) => handleResumeExpChange("title", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block font-sans text-[9px] font-bold  text-text-theme">Company Name</label>
+                              <input
+                                type="text"
+                                value={currentResumeExp.company}
+                                onChange={(e) => handleResumeExpChange("company", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block font-sans text-[9px] font-bold  text-text-theme">Employment Period</label>
+                              <input
+                                type="text"
+                                value={currentResumeExp.period}
+                                onChange={(e) => handleResumeExpChange("period", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block font-sans text-[9px] font-bold  text-text-theme">Key Contributions (One bullet point per line)</label>
+                            <textarea
+                              value={currentResumeExp.bullets.join("\n")}
+                              onChange={(e) => handleResumeExpChange("bullets", e.target.value.split("\n").map(b => b.trim()).filter(Boolean))}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-24 rounded-xl"
+                              placeholder="e.g. Developed high-performance modular React web app interface."
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Education Builder */}
+                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
+                      <div className="flex justify-between items-center border-b border-text-theme pb-2 flex-wrap gap-2">
+                        <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">4. Education Certifications ({localData.resume?.education?.length || 0})</h4>
+                        <button
+                          onClick={handleAddNewResumeEdu}
+                          className="px-2.5 py-1 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 text-[10px] font-sans font-bold  flex items-center gap-1 hover:-translate-y-0.5 hover:-translate-y-0.5 transition-all cursor-pointer shadow-sm active:translate-y-0 active:translate-y-0 rounded-xl"
+                        >
+                          <Plus className="w-3 h-3" />
+                          Add Education
+                        </button>
+                      </div>
+
+                      {/* Selector list */}
+                      <div className="flex flex-wrap gap-2 p-3 bg-surface-theme border border-border-theme/40">
+                        {(localData.resume?.education || []).map((edu) => (
+                          <div
+                            key={edu.id}
+                            className={`flex items-center border border-border-theme/40 font-sans text-[11px] font-bold  overflow-hidden ${selectedResumeEduId === edu.id ? "bg-secondary-theme text-black" : "bg-bg-theme text-text-theme"
+                              }`}
+                          >
+                            <button
+                              onClick={() => setSelectedResumeEduId(edu.id)}
+                              className="px-3 py-1.5 cursor-pointer"
+                            >
+                              {edu.school}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteResumeEdu(edu.id)}
+                              className="px-2 py-1.5 bg-red-500 hover:bg-red-600 border-l-2 border-text-theme text-white text-xs cursor-pointer flex items-center justify-center"
+                              title="Delete Resume Education"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Selected education fields */}
+                      {currentResumeEdu && (
+                        <div className="p-3 border border-border-theme/40 bg-bg-theme space-y-3 animate-[fadeInUp_0.1s_ease_forwards]">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div className="space-y-1">
+                              <label className="block font-sans text-[9px] font-bold  text-text-theme">Degree / Certification</label>
+                              <input
+                                type="text"
+                                value={currentResumeEdu.degree}
+                                onChange={(e) => handleResumeEduChange("degree", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block font-sans text-[9px] font-bold  text-text-theme">School / Institution</label>
+                              <input
+                                type="text"
+                                value={currentResumeEdu.school}
+                                onChange={(e) => handleResumeEduChange("school", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="block font-sans text-[9px] font-bold  text-text-theme">Study Period</label>
+                              <input
+                                type="text"
+                                value={currentResumeEdu.period}
+                                onChange={(e) => handleResumeEduChange("period", e.target.value)}
+                                className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-1">
+                            <label className="block font-sans text-[9px] font-bold  text-text-theme">Honors &amp; Specific Details</label>
+                            <textarea
+                              value={currentResumeEdu.details}
+                              onChange={(e) => handleResumeEduChange("details", e.target.value)}
+                              className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16 rounded-xl"
+                              placeholder="e.g. Specialized in computer graphics, web frameworks. Graduated with Honors."
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Technical Skills Lists */}
+                    <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
+                      <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">5. Technical Skills &amp; Proficiencies</h4>
+
+                      <div className="space-y-3">
                         <div className="space-y-1">
-                          <label className="block font-sans text-[9px] font-bold  text-text-theme">Degree / Certification</label>
-                          <input 
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Frontend Stack (Comma separated)</label>
+                          <input
                             type="text"
-                            value={currentResumeEdu.degree}
-                            onChange={(e) => handleResumeEduChange("degree", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
+                            value={localData.resume?.skills?.frontend || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: {
+                                ...localData.resume,
+                                skills: { ...localData.resume.skills, frontend: e.target.value }
+                              }
+                            })}
+                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="block font-sans text-[9px] font-bold  text-text-theme">School / Institution</label>
-                          <input 
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Backend &amp; Systems (Comma separated)</label>
+                          <input
                             type="text"
-                            value={currentResumeEdu.school}
-                            onChange={(e) => handleResumeEduChange("school", e.target.value)}
-                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans font-bold  text-xs text-text-theme rounded-xl"
+                            value={localData.resume?.skills?.backend || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: {
+                                ...localData.resume,
+                                skills: { ...localData.resume.skills, backend: e.target.value }
+                              }
+                            })}
+                            className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="block font-sans text-[9px] font-bold  text-text-theme">Study Period</label>
-                          <input 
+                          <label className="block font-sans text-[10px] font-bold  text-text-theme">Tools &amp; Infrastructure (Comma separated)</label>
+                          <input
                             type="text"
-                            value={currentResumeEdu.period}
-                            onChange={(e) => handleResumeEduChange("period", e.target.value)}
+                            value={localData.resume?.skills?.tools || ""}
+                            onChange={(e) => setLocalData({
+                              ...localData,
+                              resume: {
+                                ...localData.resume,
+                                skills: { ...localData.resume.skills, tools: e.target.value }
+                              }
+                            })}
                             className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
                           />
                         </div>
                       </div>
-
-                      <div className="space-y-1">
-                        <label className="block font-sans text-[9px] font-bold  text-text-theme">Honors &amp; Specific Details</label>
-                        <textarea 
-                          value={currentResumeEdu.details}
-                          onChange={(e) => handleResumeEduChange("details", e.target.value)}
-                          className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme h-16 rounded-xl"
-                          placeholder="e.g. Specialized in computer graphics, web frameworks. Graduated with Honors."
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Technical Skills Lists */}
-                <div className="p-4 border border-border-theme/40 bg-surface-theme space-y-4 shadow-md ">
-                  <h4 className="font-sans text-[11px] font-bold  tracking-wider text-secondary-theme">5. Technical Skills &amp; Proficiencies</h4>
-                  
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Frontend Stack (Comma separated)</label>
-                      <input 
-                        type="text"
-                        value={localData.resume?.skills?.frontend || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: {
-                            ...localData.resume,
-                            skills: { ...localData.resume.skills, frontend: e.target.value }
-                          }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Backend &amp; Systems (Comma separated)</label>
-                      <input 
-                        type="text"
-                        value={localData.resume?.skills?.backend || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: {
-                            ...localData.resume,
-                            skills: { ...localData.resume.skills, backend: e.target.value }
-                          }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block font-sans text-[10px] font-bold  text-text-theme">Tools &amp; Infrastructure (Comma separated)</label>
-                      <input 
-                        type="text"
-                        value={localData.resume?.skills?.tools || ""}
-                        onChange={(e) => setLocalData({
-                          ...localData,
-                          resume: {
-                            ...localData.resume,
-                            skills: { ...localData.resume.skills, tools: e.target.value }
-                          }
-                        })}
-                        className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
-                      />
                     </div>
                   </div>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* SYSTEM TEMPLATE IMPORT/EXPORT */}
-            {activeTab === "system" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
-                  JSON Template Import &amp; Export Systems
-                </h3>
-                
-                <p className="font-sans text-sm font-medium text-text-variant leading-relaxed">
-                  Your portfolio acts as a fully dynamic digital canvas. You can edit individual sections in the tabs above, or you can serialize the entire site into a single backup JSON document. Use this to save different portfolio profiles or swap template designs instantly.
-                </p>
+                {/* SYSTEM TEMPLATE IMPORT/EXPORT */}
+                {activeTab === "system" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold  tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
+                      JSON Template Import &amp; Export Systems
+                    </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Export Box */}
-                  <div className="p-6 border border-border-theme/40 bg-surface-theme flex flex-col justify-between gap-4 shadow-md ">
-                    <div className="space-y-2">
-                      <h4 className="font-sans text-sm font-bold  tracking-wider text-text-theme">
-                        Export Current Template Configuration
-                      </h4>
-                      <p className="font-sans text-xs font-medium text-text-variant">
-                        Export your customized titles, works, projects, skills, and logs as a template configuration file.
-                      </p>
-                    </div>
-                    <button 
-                      onClick={handleExportJSON}
-                      className="w-full py-3 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center justify-center gap-2 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
-                    >
-                      <Download className="w-4 h-4" />
-                      Export portfolio-template.json
-                    </button>
-                  </div>
-
-                  {/* Import Box */}
-                  <div className="p-6 border border-border-theme/40 bg-surface-theme flex flex-col justify-between gap-4 shadow-md ">
-                    <div className="space-y-2">
-                      <h4 className="font-sans text-sm font-bold  tracking-wider text-text-theme">
-                        Import Template Configuration File
-                      </h4>
-                      <p className="font-sans text-xs font-medium text-text-variant">
-                        Load a previously exported portfolio template configurations JSON file. It will instantly recompile your homepage template layout.
-                      </p>
-                    </div>
-                    
-                    <label className="w-full py-3 bg-primary-theme hover:bg-opacity-90 text-on-primary-theme border border-border-theme/40 text-xs font-sans font-bold  flex items-center justify-center gap-2 shadow-sm hover:-translate-y-0.5 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer">
-                      <Upload className="w-4 h-4" />
-                      Upload template.json
-                      <input 
-                        type="file" 
-                        accept=".json"
-                        onChange={handleImportJSON}
-                        className="hidden" 
-                      />
-                    </label>
-                  </div>
-                </div>
-
-                <div className="p-4 border-2 border-yellow-500 bg-yellow-500/10 text-yellow-800 dark:text-yellow-400 text-xs flex items-start gap-2.5">
-                  <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <h5 className="font-bold  mb-0.5">Template Architecture Notice</h5>
-                    <p className="font-medium leading-relaxed">
-                      All templates are cached locally in your sandbox sandbox browser memory (localStorage). If you clear your browser cookies or cache, your customizations may be reset to default hardcoded configurations. Export your JSON config file to save backups securely!
+                    <p className="font-sans text-sm font-medium text-text-variant leading-relaxed">
+                      Your portfolio acts as a fully dynamic digital canvas. You can edit individual sections in the tabs above, or you can serialize the entire site into a single backup JSON document. Use this to save different portfolio profiles or swap template designs instantly.
                     </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Export Box */}
+                      <div className="p-6 border border-border-theme/40 bg-surface-theme flex flex-col justify-between gap-4 shadow-md ">
+                        <div className="space-y-2">
+                          <h4 className="font-sans text-sm font-bold  tracking-wider text-text-theme">
+                            Export Current Template Configuration
+                          </h4>
+                          <p className="font-sans text-xs font-medium text-text-variant">
+                            Export your customized titles, works, projects, skills, and logs as a template configuration file.
+                          </p>
+                        </div>
+                        <button
+                          onClick={handleExportJSON}
+                          className="w-full py-3 bg-secondary-theme hover:bg-yellow-400 text-black border border-border-theme/40 text-xs font-sans font-bold  flex items-center justify-center gap-2 shadow-sm active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer"
+                        >
+                          <Download className="w-4 h-4" />
+                          Export portfolio-template.json
+                        </button>
+                      </div>
+
+                      {/* Import Box */}
+                      <div className="p-6 border border-border-theme/40 bg-surface-theme flex flex-col justify-between gap-4 shadow-md ">
+                        <div className="space-y-2">
+                          <h4 className="font-sans text-sm font-bold  tracking-wider text-text-theme">
+                            Import Template Configuration File
+                          </h4>
+                          <p className="font-sans text-xs font-medium text-text-variant">
+                            Load a previously exported portfolio template configurations JSON file. It will instantly recompile your homepage template layout.
+                          </p>
+                        </div>
+
+                        <label className="w-full py-3 bg-primary-theme hover:bg-opacity-90 text-on-primary-theme border border-border-theme/40 text-xs font-sans font-bold  flex items-center justify-center gap-2 shadow-sm hover:-translate-y-0.5 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:translate-y-0 active:scale-98 transition-all cursor-pointer">
+                          <Upload className="w-4 h-4" />
+                          Upload template.json
+                          <input
+                            type="file"
+                            accept=".json"
+                            onChange={handleImportJSON}
+                            className="hidden"
+                          />
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="p-4 border-2 border-yellow-500 bg-yellow-500/10 text-yellow-800 dark:text-yellow-400 text-xs flex items-start gap-2.5">
+                      <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h5 className="font-bold  mb-0.5">Template Architecture Notice</h5>
+                        <p className="font-medium leading-relaxed">
+                          All templates are cached locally in your sandbox sandbox browser memory (localStorage). If you clear your browser cookies or cache, your customizations may be reset to default hardcoded configurations. Export your JSON config file to save backups securely!
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* VISITOR STATISTICS ANALYTICS */}
-            {activeTab === "stats" && (
-              <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
-                <h3 className="text-xl font-bold tracking-tight text-text-theme flex items-center gap-2 border-b border-border-theme/40 pb-1">
-                  Visitor Traffic &amp; Action Analytics
-                </h3>
+                {/* VISITOR STATISTICS ANALYTICS */}
+                {activeTab === "stats" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold tracking-tight text-text-theme flex items-center gap-2 border-b border-border-theme/40 pb-1">
+                      Visitor Traffic &amp; Action Analytics
+                    </h3>
 
-                <p className="font-sans text-sm font-medium text-text-variant leading-relaxed">
-                  Real-time local tracking metrics compiled from sandbox browser engagement. Use this to audit project visits, code checkouts, and resume downloads.
-                </p>
+                    <p className="font-sans text-sm font-medium text-text-variant leading-relaxed">
+                      Real-time local tracking metrics compiled from sandbox browser engagement. Use this to audit project visits, code checkouts, and resume downloads.
+                    </p>
 
-                {/* Main Counters Panel */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Total Page Views */}
-                  <div className="p-6 border border-border-theme/40 bg-surface-theme rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-variant">Engagement Overview</span>
-                      <h4 className="font-sans text-2xl font-bold text-text-theme">Portfolio Visits</h4>
-                    </div>
-                    <div className="text-4xl font-extrabold text-secondary-theme mt-6">
-                      {localStorage.getItem("portfolio_visits") || "0"} <span className="text-xs font-semibold text-text-variant">views</span>
-                    </div>
-                  </div>
+                    {/* Main Counters Panel */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {/* Total Page Views */}
+                      <div className="p-6 border border-border-theme/40 bg-surface-theme rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-variant">Engagement Overview</span>
+                          <h4 className="font-sans text-2xl font-bold text-text-theme">Portfolio Visits</h4>
+                        </div>
+                        <div className="text-4xl font-extrabold text-secondary-theme mt-6">
+                          {localStorage.getItem("portfolio_visits") || "0"} <span className="text-xs font-semibold text-text-variant">views</span>
+                        </div>
+                      </div>
 
-                  {/* Total Resume Downloads */}
-                  <div className="p-6 border border-border-theme/40 bg-surface-theme rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-variant">Credential Delivery</span>
-                      <h4 className="font-sans text-2xl font-bold text-text-theme">Resume Downloads</h4>
-                    </div>
-                    <div className="text-4xl font-extrabold text-secondary-theme mt-6">
-                      {localStorage.getItem("resume_downloads") || "0"} <span className="text-xs font-semibold text-text-variant">downloads</span>
-                    </div>
-                  </div>
+                      {/* Total Resume Downloads */}
+                      <div className="p-6 border border-border-theme/40 bg-surface-theme rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-variant">Credential Delivery</span>
+                          <h4 className="font-sans text-2xl font-bold text-text-theme">Resume Downloads</h4>
+                        </div>
+                        <div className="text-4xl font-extrabold text-secondary-theme mt-6">
+                          {localStorage.getItem("resume_downloads") || "0"} <span className="text-xs font-semibold text-text-variant">downloads</span>
+                        </div>
+                      </div>
 
-                  {/* Total Project Clicks */}
-                  <div className="p-6 border border-border-theme/40 bg-surface-theme rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
-                    <div className="space-y-1">
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-variant">Launch Operations</span>
-                      <h4 className="font-sans text-2xl font-bold text-text-theme">Launch Actions</h4>
+                      {/* Total Project Clicks */}
+                      <div className="p-6 border border-border-theme/40 bg-surface-theme rounded-2xl flex flex-col justify-between shadow-sm relative overflow-hidden">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-text-variant">Launch Operations</span>
+                          <h4 className="font-sans text-2xl font-bold text-text-theme">Launch Actions</h4>
+                        </div>
+                        <div className="text-4xl font-extrabold text-secondary-theme mt-6">
+                          {Object.values(JSON.parse(localStorage.getItem("project_visits") || "{}")).reduce((a: any, b: any) => a + b, 0) as number} <span className="text-xs font-semibold text-text-variant">clicks</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-4xl font-extrabold text-secondary-theme mt-6">
-                      {Object.values(JSON.parse(localStorage.getItem("project_visits") || "{}")).reduce((a: any, b: any) => a + b, 0) as number} <span className="text-xs font-semibold text-text-variant">clicks</span>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Tabulated breakdown details */}
-                <div className="border border-border-theme/40 bg-surface-theme rounded-2xl p-6 shadow-sm space-y-4">
-                  <h4 className="font-sans text-sm font-bold tracking-tight text-text-theme flex items-center gap-1.5 border-b border-border-theme/40 pb-2">
-                    <MousePointerClick className="w-4 h-4 text-secondary-theme" />
-                    Selected Works Individual Analytics breakdown
-                  </h4>
-                  
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="border-b border-border-theme/40 font-bold text-text-theme">
-                          <th className="py-2.5 px-1.5">Project Title</th>
-                          <th className="py-2.5 px-1.5">Live Demo Visits</th>
-                          <th className="py-2.5 px-1.5">Repo Inspect Clicks</th>
-                          <th className="py-2.5 px-1.5">Total Interaction Rate</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {localData.projects.items.map((proj) => {
-                          const demoVisits = JSON.parse(localStorage.getItem("project_visits") || "{}")[proj.id] || 0;
-                          const repoInspects = JSON.parse(localStorage.getItem("repo_visits") || "{}")[proj.id] || 0;
-                          return (
-                            <tr key={proj.id} className="border-b border-border-theme/20 font-medium text-text-variant">
-                              <td className="py-3 px-1.5 font-semibold text-text-theme">{proj.title}</td>
-                              <td className="py-3 px-1.5">{demoVisits}</td>
-                              <td className="py-3 px-1.5">{repoInspects}</td>
-                              <td className="py-3 px-1.5 text-secondary-theme font-bold">{demoVisits + repoInspects}</td>
+                    {/* Tabulated breakdown details */}
+                    <div className="border border-border-theme/40 bg-surface-theme rounded-2xl p-6 shadow-sm space-y-4">
+                      <h4 className="font-sans text-sm font-bold tracking-tight text-text-theme flex items-center gap-1.5 border-b border-border-theme/40 pb-2">
+                        <MousePointerClick className="w-4 h-4 text-secondary-theme" />
+                        Selected Works Individual Analytics breakdown
+                      </h4>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="border-b border-border-theme/40 font-bold text-text-theme">
+                              <th className="py-2.5 px-1.5">Project Title</th>
+                              <th className="py-2.5 px-1.5">Live Demo Visits</th>
+                              <th className="py-2.5 px-1.5">Repo Inspect Clicks</th>
+                              <th className="py-2.5 px-1.5">Total Interaction Rate</th>
                             </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                          </thead>
+                          <tbody>
+                            {localData.projects.items.map((proj) => {
+                              const demoVisits = JSON.parse(localStorage.getItem("project_visits") || "{}")[proj.id] || 0;
+                              const repoInspects = JSON.parse(localStorage.getItem("repo_visits") || "{}")[proj.id] || 0;
+                              return (
+                                <tr key={proj.id} className="border-b border-border-theme/20 font-medium text-text-variant">
+                                  <td className="py-3 px-1.5 font-semibold text-text-theme">{proj.title}</td>
+                                  <td className="py-3 px-1.5">{demoVisits}</td>
+                                  <td className="py-3 px-1.5">{repoInspects}</td>
+                                  <td className="py-3 px-1.5 text-secondary-theme font-bold">{demoVisits + repoInspects}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
 
-                <div className="p-4 border border-border-theme/40 bg-surface-container-theme/30 text-xs flex items-start gap-2.5 rounded-xl">
-                  <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-secondary-theme" />
-                  <div>
-                    <h5 className="font-bold mb-0.5 text-text-theme">LocalStorage Tracker Mode</h5>
-                    <p className="font-medium leading-relaxed text-text-variant">
-                      Since this is a client-side portfolio template, analytics counts are saved within browser LocalStorage. These metrics show interaction counts originating from the current client browser environment.
-                    </p>
+                    <div className="p-4 border border-border-theme/40 bg-surface-container-theme/30 text-xs flex items-start gap-2.5 rounded-xl">
+                      <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-secondary-theme" />
+                      <div>
+                        <h5 className="font-bold mb-0.5 text-text-theme">LocalStorage Tracker Mode</h5>
+                        <p className="font-medium leading-relaxed text-text-variant">
+                          Since this is a client-side portfolio template, analytics counts are saved within browser LocalStorage. These metrics show interaction counts originating from the current client browser environment.
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
 
-        {/* Portal Bottom Footer Actions */}
-        <div className="bg-surface-theme border-t-4 border-text-theme p-4 flex justify-between items-center select-none flex-wrap gap-4">
-          <div className="text-xs font-sans text-text-variant font-bold ">
-            {toastMessage ? (
-              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-pulse">
-                <Check className="w-4 h-4 stroke-[3]" />
-                {toastMessage}
-              </span>
-            ) : (
-              <span>Template editing draft active...</span>
-            )}
-          </div>
+            {/* Portal Bottom Footer Actions */}
+            <div className="bg-surface-theme border-t-4 border-text-theme p-4 flex justify-between items-center select-none flex-wrap gap-4">
+              <div className="text-xs font-sans text-text-variant font-bold ">
+                {toastMessage ? (
+                  <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 animate-pulse">
+                    <Check className="w-4 h-4 stroke-[3]" />
+                    {toastMessage}
+                  </span>
+                ) : (
+                  <span>Template editing draft active...</span>
+                )}
+              </div>
 
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={onClose}
-              className="px-6 py-3 bg-surface-theme border border-border-theme/40 font-sans text-xs font-bold  tracking-wider hover:bg-surface-container-theme transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleSave}
-              className="px-8 py-3 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 font-sans text-xs font-bold  tracking-widest flex items-center gap-2 shadow-md  hover:-translate-y-0.5 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-[5px_5px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:scale-98 transition-all cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              Save &amp; Deploy Changes
-            </button>
-          </div>
-        </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-3 bg-surface-theme border border-border-theme/40 font-sans text-xs font-bold  tracking-wider hover:bg-surface-container-theme transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-8 py-3 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 font-sans text-xs font-bold  tracking-widest flex items-center gap-2 shadow-md  hover:-translate-y-0.5 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-[5px_5px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:scale-98 transition-all cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  Save &amp; Deploy Changes
+                </button>
+              </div>
+            </div>
           </>
         )}
       </div>

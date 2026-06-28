@@ -24,7 +24,8 @@ import {
   ShieldAlert,
   BarChart3,
   MousePointerClick,
-  Info
+  Info,
+  Camera
 } from "lucide-react";
 import { PortfolioData, Project, TimelineItem, SkillDetail, ResumeExperience, ResumeEducation } from "../types";
 
@@ -36,7 +37,7 @@ interface AdminPortalProps {
   onReset: () => void;
 }
 
-type TabType = "hero" | "about" | "projects" | "timeline" | "resume" | "system" | "stats";
+type TabType = "hero" | "about" | "projects" | "timeline" | "resume" | "photography" | "system" | "stats";
 
 export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: AdminPortalProps) {
   const [activeTab, setActiveTab] = useState<TabType>("hero");
@@ -59,6 +60,7 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
   // Resume specific sub-item selections
   const [selectedResumeExpId, setSelectedResumeExpId] = useState<string>(localData.resume?.experience?.[0]?.id || "");
   const [selectedResumeEduId, setSelectedResumeEduId] = useState<string>(localData.resume?.education?.[0]?.id || "");
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string>(localData.photography?.photos?.[0]?.id || "");
 
   if (!isOpen) return null;
 
@@ -1519,6 +1521,163 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                             className="w-full p-2 border border-border-theme/40 bg-surface-theme rounded-xl p-2.5 font-sans text-xs text-text-theme rounded-xl"
                           />
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* PHOTOGRAPHY TAB */}
+                {activeTab === "photography" && (
+                  <div className="space-y-6 animate-[fadeInUp_0.2s_ease_forwards]">
+                    <h3 className="text-xl font-bold tracking-tight text-text-theme flex items-center gap-2 border-b-2 border-text-theme pb-1">
+                      Edit Photography Showcase
+                    </h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold text-text-theme">Section Title</label>
+                        <input
+                          type="text"
+                          value={localData.photography?.title || ""}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            photography: { ...localData.photography, title: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block font-sans text-xs font-bold text-text-theme">Instagram URL</label>
+                        <input
+                          type="text"
+                          value={localData.photography?.instagramUrl || ""}
+                          onChange={(e) => setLocalData({
+                            ...localData,
+                            photography: { ...localData.photography, instagramUrl: e.target.value }
+                          })}
+                          className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans font-medium text-sm text-text-theme"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <label className="block font-sans text-xs font-bold text-text-theme">Description</label>
+                      <textarea
+                        value={localData.photography?.description || ""}
+                        onChange={(e) => setLocalData({
+                          ...localData,
+                          photography: { ...localData.photography, description: e.target.value }
+                        })}
+                        className="w-full p-2.5 border border-border-theme/40 bg-surface-theme font-sans text-sm text-text-theme h-20"
+                      />
+                    </div>
+                    
+                    {/* Photo Manager */}
+                    <div className="bg-surface-theme border border-border-theme p-4 space-y-4 rounded-xl">
+                      <div className="flex justify-between items-center pb-2 border-b border-border-theme">
+                        <h4 className="font-sans text-sm font-bold text-text-theme">Instagram Photos / Shots</h4>
+                        <button
+                          onClick={() => {
+                            const newId = "photo-" + Date.now();
+                            setLocalData(prev => ({
+                              ...prev,
+                              photography: {
+                                ...prev.photography,
+                                photos: [...(prev.photography?.photos || []), { id: newId, url: "", caption: "New Photo" }]
+                              }
+                            }));
+                            setSelectedPhotoId(newId);
+                          }}
+                          className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider bg-secondary-theme text-white px-2 py-1 rounded hover:bg-secondary-theme/80 transition-colors"
+                        >
+                          <Plus className="w-3 h-3" /> Add Photo
+                        </button>
+                      </div>
+                      
+                      <div className="flex flex-col md:flex-row gap-4 items-start">
+                        {/* List */}
+                        <div className="w-full md:w-1/3 flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                          {localData.photography?.photos?.map(photo => (
+                            <div 
+                              key={photo.id}
+                              className={`flex items-center justify-between p-2 rounded cursor-pointer transition-colors border ${selectedPhotoId === photo.id ? 'border-secondary-theme bg-secondary-theme/10' : 'border-border-theme/40 hover:border-secondary-theme/50'}`}
+                              onClick={() => setSelectedPhotoId(photo.id)}
+                            >
+                              <span className="font-sans text-xs truncate max-w-[150px] font-medium text-text-theme">{photo.caption || "Untitled"}</span>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setLocalData(prev => ({
+                                    ...prev,
+                                    photography: {
+                                      ...prev.photography,
+                                      photos: prev.photography.photos.filter(p => p.id !== photo.id)
+                                    }
+                                  }));
+                                  if (selectedPhotoId === photo.id) setSelectedPhotoId("");
+                                }}
+                                className="text-text-variant hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Editor */}
+                        {selectedPhotoId && localData.photography?.photos?.find(p => p.id === selectedPhotoId) ? (
+                          <div className="w-full md:w-2/3 space-y-3 bg-bg-theme p-4 border border-border-theme/40 rounded-lg">
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-text-variant">Image URL (Thumbnail Link)</label>
+                              <input 
+                                type="text"
+                                value={localData.photography.photos.find(p => p.id === selectedPhotoId)?.url || ""}
+                                onChange={(e) => {
+                                  setLocalData(prev => ({
+                                    ...prev,
+                                    photography: {
+                                      ...prev.photography,
+                                      photos: prev.photography.photos.map(p => p.id === selectedPhotoId ? { ...p, url: e.target.value } : p)
+                                    }
+                                  }))
+                                }}
+                                className="w-full p-2 bg-surface-theme border border-border-theme/50 text-xs text-text-theme rounded"
+                                placeholder="https://..."
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-text-variant">Caption</label>
+                              <input 
+                                type="text"
+                                value={localData.photography.photos.find(p => p.id === selectedPhotoId)?.caption || ""}
+                                onChange={(e) => {
+                                  setLocalData(prev => ({
+                                    ...prev,
+                                    photography: {
+                                      ...prev.photography,
+                                      photos: prev.photography.photos.map(p => p.id === selectedPhotoId ? { ...p, caption: e.target.value } : p)
+                                    }
+                                  }))
+                                }}
+                                className="w-full p-2 bg-surface-theme border border-border-theme/50 text-xs text-text-theme rounded"
+                              />
+                            </div>
+                            {/* Preview */}
+                            {localData.photography.photos.find(p => p.id === selectedPhotoId)?.url && (
+                                <div className="mt-2 aspect-square max-w-[150px] overflow-hidden border border-border-theme/50 rounded-md">
+                                  <img 
+                                    src={localData.photography.photos.find(p => p.id === selectedPhotoId)?.url} 
+                                    alt="Preview" 
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-full md:w-2/3 flex items-center justify-center p-8 border border-dashed border-border-theme/50 text-text-variant text-xs rounded-lg bg-surface-theme">
+                            Select a photo from the list to edit its details.
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

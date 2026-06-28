@@ -245,5 +245,42 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       backend: "Node.js, Express, PostgreSQL, Redis, Docker, RESTful APIs, GraphQL",
       tools: "Git/GitHub, Figma, Vercel, AWS (S3, CloudFront), Netlify, CI/CD, Vite"
     }
+  },
+  photography: {
+    title: "Photography & Moments",
+    description: "Beyond the code, I have a deep passion for capturing moments through a lens. Here are some of my favorite clicks directly from my Instagram.",
+    instagramUrl: "https://instagram.com/",
+    photos: [
+      {
+        id: "photo-1",
+        url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800",
+        caption: "Vintage camera shot"
+      },
+      {
+        id: "photo-2",
+        url: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&q=80&w=800",
+        caption: "Street photography"
+      },
+      {
+        id: "photo-3",
+        url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=800",
+        caption: "Nature landscapes"
+      },
+      {
+        id: "photo-4",
+        url: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800",
+        caption: "Urban exploration"
+      },
+      {
+        id: "photo-5",
+        url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800",
+        caption: "Portrait study"
+      },
+      {
+        id: "photo-6",
+        url: "https://images.unsplash.com/photo-1478641300939-0ec5188d3802?auto=format&fit=crop&q=80&w=800",
+        caption: "Minimalist architecture"
+      }
+    ]
   }
 };

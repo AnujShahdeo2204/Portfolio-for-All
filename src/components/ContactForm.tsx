@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Send, CheckCircle, Trash2, Mail, Linkedin, Github, Twitter, Info } from "lucide-react";
+import { Send, CheckCircle, Trash2, Mail, Linkedin, Github, Instagram, Info } from "lucide-react";
 
 interface SavedMessage {
   id: string;
@@ -277,15 +277,15 @@ export default function ContactForm({ recipientEmail }: ContactFormProps) {
           </a>
 
           <a 
-            href="https://twitter.com" 
+            href="https://instagram.com" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="text-text-theme hover:scale-105 transition-all flex flex-col items-center gap-1.5 group"
           >
             <div className="w-11 h-11 border border-border-theme rounded-full bg-surface-theme flex items-center justify-center group-hover:bg-secondary-theme group-hover:text-white transition-all shadow-sm">
-              <Twitter className="w-4.5 h-4.5" />
+              <Instagram className="w-4.5 h-4.5" />
             </div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-text-variant">Twitter</span>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-text-variant">Instagram</span>
           </a>
         </div>
       </div>

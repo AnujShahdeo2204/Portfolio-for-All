@@ -10,6 +10,7 @@ import PixelDog from "./components/PixelDog";
 import ResumeModal from "./components/ResumeModal";
 import CursorFollower from "./components/CursorFollower";
 import AdminPortal from "./components/AdminPortal";
+import Photography from "./components/Photography";
 import ResumePreview from "./components/ResumePreview";
 import { DEFAULT_PORTFOLIO_DATA } from "./defaultData";
 import { PortfolioData } from "./types";
@@ -100,6 +101,9 @@ export default function App() {
 
         {/* Historical Timeline */}
         <Timeline timelineData={portfolioData.timeline} />
+
+        {/* Photography Showcase */}
+        <Photography photographyData={portfolioData.photography} />
 
         {/* Interactive Validation Contact Section */}
         <ContactForm recipientEmail={portfolioData.resume.email} />

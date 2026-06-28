@@ -61,6 +61,19 @@ export interface ResumeData {
   };
 }
 
+export interface PhotographyPhoto {
+  id: string;
+  url: string;
+  caption: string;
+}
+
+export interface PhotographyData {
+  title: string;
+  description: string;
+  instagramUrl: string;
+  photos: PhotographyPhoto[];
+}
+
 export interface PortfolioData {
   hero: {
     logoName: string;
@@ -84,5 +97,5 @@ export interface PortfolioData {
     items: TimelineItem[];
   };
   resume: ResumeData;
+  photography: PhotographyData;
 }
-

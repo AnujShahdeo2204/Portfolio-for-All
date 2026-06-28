@@ -30,9 +30,12 @@ export default function App() {
   // Load portfolio template data from Firebase
   useEffect(() => {
     fetch(FIREBASE_URL)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
       .then(data => {
-        if (data) {
+        if (data && !data.error) {
           setPortfolioData({
             ...DEFAULT_PORTFOLIO_DATA,
             ...data,
@@ -75,25 +78,31 @@ export default function App() {
 
   // Save changes from Admin Portal to Firebase
   const handleSavePortfolioData = async (newData: PortfolioData) => {
-    await fetch(FIREBASE_URL, {
+    const res = await fetch(FIREBASE_URL, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(newData)
     });
+    if (!res.ok) {
+      throw new Error(`Firebase save failed with status: ${res.status}`);
+    }
     setPortfolioData(newData);
   };
 
   // Reset to default template on Firebase
   const handleResetPortfolioData = async () => {
-    await fetch(FIREBASE_URL, {
+    const res = await fetch(FIREBASE_URL, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify(DEFAULT_PORTFOLIO_DATA)
     });
+    if (!res.ok) {
+      throw new Error(`Firebase reset failed with status: ${res.status}`);
+    }
     setPortfolioData(DEFAULT_PORTFOLIO_DATA);
   };
 

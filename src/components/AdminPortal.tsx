@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   X,
   Save,
+  Loader2,
   RotateCcw,
   Plus,
   Trash2,
@@ -33,8 +34,8 @@ interface AdminPortalProps {
   isOpen: boolean;
   onClose: () => void;
   data: PortfolioData;
-  onSave: (newData: PortfolioData) => void;
-  onReset: () => void;
+  onSave: (newData: PortfolioData) => Promise<void>;
+  onReset: () => Promise<void>;
 }
 
 type TabType = "hero" | "about" | "projects" | "timeline" | "resume" | "photography" | "system" | "stats";
@@ -43,6 +44,7 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
   const [activeTab, setActiveTab] = useState<TabType>("hero");
   const [localData, setLocalData] = useState<PortfolioData>(JSON.parse(JSON.stringify(data)));
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Authentication states
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -106,16 +108,32 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
   };
 
   // Save changes
-  const handleSave = () => {
-    onSave(localData);
-    triggerToast("All template changes successfully deployed & synced!");
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await onSave(localData);
+      triggerToast("All template changes successfully deployed & synced!");
+    } catch (error) {
+      triggerToast("Error saving data. Please check console.");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Reset to defaults
-  const handleResetClick = () => {
+  const handleResetClick = async () => {
     if (confirm("Are you sure you want to reset all portfolio details back to default template presets? This cannot be undone.")) {
-      onReset();
-      onClose();
+      setIsSaving(true);
+      try {
+        await onReset();
+        onClose();
+      } catch (error) {
+        triggerToast("Error resetting data. Please check console.");
+        console.error(error);
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -1896,10 +1914,20 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-8 py-3 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 font-sans text-xs font-bold  tracking-widest flex items-center gap-2 shadow-md  hover:-translate-y-0.5 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-[5px_5px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:scale-98 transition-all cursor-pointer"
+                  disabled={isSaving}
+                  className="px-8 py-3 bg-primary-theme text-on-primary-theme rounded-full border border-border-theme/40 font-sans text-xs font-bold  tracking-widest flex items-center gap-2 shadow-md  hover:-translate-y-0.5 hover:-translate-y-0.5 hover:shadow-md dark:hover:shadow-[5px_5px_0px_0px_rgba(255,255,255,1)] active:translate-x-[2px] active:translate-y-[2px] active:scale-98 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="w-4 h-4" />
-                  Save &amp; Deploy Changes
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      Save &amp; Deploy Changes
+                    </>
+                  )}
                 </button>
               </div>
             </div>

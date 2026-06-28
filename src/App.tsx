@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import Header from "./components/Header";
 import Hero from "./components/Hero";
 import Approach from "./components/Approach";
@@ -20,23 +21,32 @@ export default function App() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
-  // Load portfolio template data from localStorage or fallback to default
-  const [portfolioData, setPortfolioData] = useState<PortfolioData>(() => {
-    try {
-      const saved = localStorage.getItem("portfolio_template_data");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return {
-          ...DEFAULT_PORTFOLIO_DATA,
-          ...parsed,
-          resume: parsed.resume || DEFAULT_PORTFOLIO_DATA.resume
-        };
-      }
-    } catch (e) {
-      console.error("Error reading portfolio_template_data", e);
-    }
-    return DEFAULT_PORTFOLIO_DATA;
-  });
+  // Initialize with defaults, but we will fetch live data from Firebase
+  const [portfolioData, setPortfolioData] = useState<PortfolioData>(DEFAULT_PORTFOLIO_DATA);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const FIREBASE_URL = "https://portfolio-for-all-9fdc3-default-rtdb.firebaseio.com/portfolio.json";
+
+  // Load portfolio template data from Firebase
+  useEffect(() => {
+    fetch(FIREBASE_URL)
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          setPortfolioData({
+            ...DEFAULT_PORTFOLIO_DATA,
+            ...data,
+            resume: data.resume || DEFAULT_PORTFOLIO_DATA.resume
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch portfolio data from Firebase:", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   // Synchronize dark class on document root
   useEffect(() => {
@@ -63,17 +73,37 @@ export default function App() {
     setIsDark((prev) => !prev);
   };
 
-  // Save changes from Admin Portal
-  const handleSavePortfolioData = (newData: PortfolioData) => {
+  // Save changes from Admin Portal to Firebase
+  const handleSavePortfolioData = async (newData: PortfolioData) => {
+    await fetch(FIREBASE_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newData)
+    });
     setPortfolioData(newData);
-    localStorage.setItem("portfolio_template_data", JSON.stringify(newData));
   };
 
-  // Reset to default template
-  const handleResetPortfolioData = () => {
+  // Reset to default template on Firebase
+  const handleResetPortfolioData = async () => {
+    await fetch(FIREBASE_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(DEFAULT_PORTFOLIO_DATA)
+    });
     setPortfolioData(DEFAULT_PORTFOLIO_DATA);
-    localStorage.removeItem("portfolio_template_data");
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-bg-theme flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-secondary-theme" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-bg-theme text-text-theme font-sans selection:bg-secondary-theme/20 selection:text-secondary-theme transition-colors duration-300">

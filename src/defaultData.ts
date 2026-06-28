@@ -254,31 +254,37 @@ export const DEFAULT_PORTFOLIO_DATA: PortfolioData = {
       {
         id: "photo-1",
         url: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800",
+        linkUrl: "https://instagram.com/",
         caption: "Vintage camera shot"
       },
       {
         id: "photo-2",
         url: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?auto=format&fit=crop&q=80&w=800",
+        linkUrl: "https://instagram.com/",
         caption: "Street photography"
       },
       {
         id: "photo-3",
         url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&q=80&w=800",
+        linkUrl: "https://instagram.com/",
         caption: "Nature landscapes"
       },
       {
         id: "photo-4",
         url: "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800",
+        linkUrl: "https://instagram.com/",
         caption: "Urban exploration"
       },
       {
         id: "photo-5",
         url: "https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800",
+        linkUrl: "https://instagram.com/",
         caption: "Portrait study"
       },
       {
         id: "photo-6",
         url: "https://images.unsplash.com/photo-1478641300939-0ec5188d3802?auto=format&fit=crop&q=80&w=800",
+        linkUrl: "https://instagram.com/",
         caption: "Minimalist architecture"
       }
     ]

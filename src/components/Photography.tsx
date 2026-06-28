@@ -40,24 +40,46 @@ export default function Photography({ photographyData }: PhotographyProps) {
 
         {/* Photo Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-          {photographyData.photos.map((photo, idx) => (
-            <div 
-              key={photo.id || idx} 
-              className="group/photo relative aspect-square overflow-hidden bg-surface-theme border border-border-theme/50 hover:border-secondary-theme/30 transition-all duration-500 rounded-lg"
-            >
-              <img 
-                src={photo.url} 
-                alt={photo.caption || "Photography shot"} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover/photo:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex items-center justify-center p-4">
-                <p className="text-white text-center text-sm font-medium opacity-0 translate-y-4 group-hover/photo:opacity-100 group-hover/photo:translate-y-0 transition-all duration-300 delay-100">
-                  {photo.caption}
-                </p>
+          {photographyData.photos.map((photo, idx) => {
+            const content = (
+              <>
+                <img 
+                  src={photo.url} 
+                  alt={photo.caption || "Photography shot"} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover/photo:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/photo:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4">
+                  <p className="text-white text-center text-sm font-medium opacity-0 translate-y-4 group-hover/photo:opacity-100 group-hover/photo:translate-y-0 transition-all duration-300 delay-100">
+                    {photo.caption}
+                  </p>
+                  {photo.linkUrl && (
+                    <span className="mt-2 text-[10px] uppercase tracking-widest text-white/70 opacity-0 translate-y-4 group-hover/photo:opacity-100 group-hover/photo:translate-y-0 transition-all duration-300 delay-150">
+                      View Post ↗
+                    </span>
+                  )}
+                </div>
+              </>
+            );
+
+            const containerClasses = "group/photo relative aspect-square overflow-hidden bg-surface-theme border border-border-theme/50 hover:border-secondary-theme/30 transition-all duration-500 rounded-lg block";
+
+            return photo.linkUrl ? (
+              <a 
+                key={photo.id || idx} 
+                href={photo.linkUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={containerClasses}
+              >
+                {content}
+              </a>
+            ) : (
+              <div key={photo.id || idx} className={containerClasses}>
+                {content}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

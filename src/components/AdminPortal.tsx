@@ -1656,6 +1656,24 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
                               />
                             </div>
                             <div className="space-y-1">
+                              <label className="text-[10px] font-bold uppercase tracking-wider text-text-variant">Redirection URL (Click Link)</label>
+                              <input 
+                                type="text"
+                                value={localData.photography.photos.find(p => p.id === selectedPhotoId)?.linkUrl || ""}
+                                onChange={(e) => {
+                                  setLocalData(prev => ({
+                                    ...prev,
+                                    photography: {
+                                      ...prev.photography,
+                                      photos: prev.photography.photos.map(p => p.id === selectedPhotoId ? { ...p, linkUrl: e.target.value } : p)
+                                    }
+                                  }))
+                                }}
+                                className="w-full p-2 bg-surface-theme border border-border-theme/50 text-xs text-text-theme rounded"
+                                placeholder="https://instagram.com/p/..."
+                              />
+                            </div>
+                            <div className="space-y-1">
                               <label className="text-[10px] font-bold uppercase tracking-wider text-text-variant">Caption</label>
                               <input 
                                 type="text"

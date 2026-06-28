@@ -64,6 +64,7 @@ export interface ResumeData {
 export interface PhotographyPhoto {
   id: string;
   url: string;
+  linkUrl?: string;
   caption: string;
 }
 

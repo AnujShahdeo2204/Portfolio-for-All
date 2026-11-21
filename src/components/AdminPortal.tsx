@@ -85,7 +85,7 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
 
       if (
         userHash === "07b36ee8e6a81d895327eeda6cfdcc5416a0ccd38ee94e2080076827ecb85bf4" && 
-        passHash === "4716616fbf7a3f1e8f24beeebc3070d33db57bb9eb59b663ee56d58a224e035e"
+        passHash === "075b098aa184e3a01fbbc6faed0c882f563ec6aaba05808e6b4db2b46299ae1c"
       ) {
         setIsAuthenticated(true);
         sessionStorage.setItem("admin_authenticated", "true");

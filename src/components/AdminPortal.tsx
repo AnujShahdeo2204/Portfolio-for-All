@@ -72,6 +72,9 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
   };
 
   const hashString = async (str: string) => {
+    if (!window.crypto?.subtle) {
+      return "";
+    }
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   };
@@ -80,13 +83,34 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
     e.preventDefault();
     
     try {
-      const userHash = await hashString(usernameInput.trim());
-      const passHash = await hashString(passwordInput);
+      const cleanUser = usernameInput.trim();
+      const cleanPass = passwordInput.trim();
 
-      if (
-        userHash === "07b36ee8e6a81d895327eeda6cfdcc5416a0ccd38ee94e2080076827ecb85bf4" && 
-        passHash === "075b098aa184e3a01fbbc6faed0c882f563ec6aaba05808e6b4db2b46299ae1c"
-      ) {
+      let userHash = "";
+      let passHash = "";
+      try {
+        userHash = await hashString(cleanUser);
+        passHash = await hashString(cleanPass);
+      } catch {
+        // Fall back gracefully if subtle crypto fails
+      }
+
+      const isValidUser =
+        cleanUser === "8303975943" ||
+        userHash === "07b36ee8e6a81d895327eeda6cfdcc5416a0ccd38ee94e2080076827ecb85bf4";
+
+      const validPassHashes = [
+        "075b098aa184e3a01fbbc6faed0c882f563ec6aaba05808e6b4db2b46299ae1c", // 8303975943Anujshahdeo
+        "4ad4bf68063a83d7a2261b6286433bf2399ac5f3b3d03b11a90f631506c89093", // 8303975943AnujShahdeo
+        "b9b8279b99bec93b5a2b45b660483f0bccb1b7471269b8e5c2e88efad4389c69", // 8303975943anujshahdeo
+        "4716616fbf7a3f1e8f24beeebc3070d33db57bb9eb59b663ee56d58a224e035e"  // original hash
+      ];
+
+      const isValidPass =
+        cleanPass.toLowerCase() === "8303975943anujshahdeo" ||
+        validPassHashes.includes(passHash);
+
+      if (isValidUser && isValidPass) {
         setIsAuthenticated(true);
         sessionStorage.setItem("admin_authenticated", "true");
         setLoginError(null);

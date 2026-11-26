@@ -19,6 +19,7 @@ Portfolio-for-All/
 â”œâ”€â”€ src/
 â”‚   â”œâ”€â”€ components/          # Reusable React components (Hero, ContactForm, etc.)
 â”‚   â”œâ”€â”€ App.tsx              # Main application component
+â”‚   â”œâ”€â”€ firebase.ts          # Firebase app/Auth setup (reads config from .env)
 â”‚   â”œâ”€â”€ index.css            # Global Tailwind CSS and custom styles
 â”‚   â””â”€â”€ main.tsx             # React entry point
 â”œâ”€â”€ .gitignore               # Ignored files for Git
@@ -51,12 +52,78 @@ To get a local copy up and running, follow these steps:
    npm install
    ```
 
-3. **Start the development server:**
+3. **Configure Firebase (for the Admin Portal):**
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in the `VITE_FIREBASE_*` values in `.env` from
+   Firebase Console > Project settings > Your apps > Web app.
+   See [Admin Portal & Firebase Security](#-admin-portal--firebase-security)
+   below for the one-time Firebase Console setup. The public portfolio
+   still loads without a `.env` file; only admin sign-in and saving
+   need it.
+
+4. **Start the development server:**
    ```bash
    npm run dev
    ```
 
-4. Open your browser and visit `http://localhost:3000`.
+5. Open your browser and visit `http://localhost:3000`.
+
+## Admin Portal & Firebase Security
+
+The portfolio content (hero, projects, timeline, resume) is stored in a
+Firebase Realtime Database and loaded publicly by the site. The Admin Portal
+lets the site owner edit that content. Editing is protected by Firebase
+Authentication — there are no passwords or credentials in this repo.
+
+### How it works
+
+- **Public read:** anyone visiting the site can read the portfolio data.
+  `App.tsx` fetches it with an unauthenticated GET, so the site works
+  for visitors with no login.
+- **Admin-only write:** saving or resetting from the Admin Portal sends
+  the signed-in admin's Firebase Auth ID token (`?auth=<token>`) with the
+  PUT request. The database rules reject writes from anyone else.
+- **Admin sign-in:** the Admin Portal signs in with Firebase Auth
+  (email/password). The session is kept by Firebase Auth, not by a flag
+  in `sessionStorage`, and no credential is ever stored in the code.
+
+### One-time Firebase Console setup
+
+1. **Enable sign-in:** Firebase Console > Build > Authentication >
+   Sign-in method > enable **Email/Password**.
+2. **Create the admin user:** Authentication > Users > Add user. Use your
+   own email and a strong password you have never used anywhere else.
+   This is the only admin account — do not share it, and never commit
+   the password to the repo.
+3. **Copy the web app config:** Project settings > Your apps > Web app.
+   Copy the values into a local `.env` file (see `.env.example`):
+   `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`,
+   `VITE_FIREBASE_DATABASE_URL`, `VITE_FIREBASE_PROJECT_ID`,
+   `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`,
+   `VITE_FIREBASE_APP_ID`. The `.env` file is git-ignored.
+4. **Lock the database rules:** Realtime Database > Rules, set:
+   ```json
+   {
+     "rules": {
+       ".read": true,
+       ".write": "auth != null"
+     }
+   }
+   ```
+   Then click **Publish**. `.read: true` keeps the public portfolio
+   working; `.write: "auth != null"` stops anyone else from overwriting
+   or deleting your data. This is what clears Firebase's "insecure rules"
+   alert for writes — the alert only complained because both read *and*
+   write were open to everyone.
+
+### If you previously used the old admin login
+
+The old login was a hardcoded username/password in `AdminPortal.tsx`
+in a public repo, so treat that password as compromised: never reuse it
+anywhere, and change it anywhere else you may have used it. Removing it
+from the code does not remove it from the repo's git history.
 
 ## 🌐 Deployment
 

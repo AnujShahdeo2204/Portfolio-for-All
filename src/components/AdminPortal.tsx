@@ -1,4 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import { auth } from "../firebase";
 import {
   X,
   Save,
@@ -46,13 +52,28 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Authentication states
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return sessionStorage.getItem("admin_authenticated") === "true";
-  });
-  const [usernameInput, setUsernameInput] = useState("");
+  // Authentication is handled by Firebase Auth (email/password), not by
+  // any credential stored in this repo. The admin user is created once in
+  // the Firebase Console (Authentication > Users). Session persistence is
+  // managed by Firebase Auth itself.
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [emailInput, setEmailInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!auth) {
+      setIsAuthLoading(false);
+      return;
+    }
+    return onAuthStateChanged(auth, (user) => {
+      setIsAuthenticated(!!user);
+      setUserEmail(user?.email ?? null);
+      setIsAuthLoading(false);
+    });
+  }, []);
 
   // States for handling item selection & creation
   const [selectedProjectId, setSelectedProjectId] = useState<string>(localData.projects.items[0]?.id || "");
@@ -71,62 +92,52 @@ export default function AdminPortal({ isOpen, onClose, data, onSave, onReset }: 
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const hashString = async (str: string) => {
-    if (!window.crypto?.subtle) {
-      return "";
-    }
-    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  };
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setLoginError(null);
+
+    if (!auth) {
+      setLoginError(
+        "Firebase Auth is not configured. Add your Firebase web app config to .env and enable Email/Password sign-in in the Firebase Console."
+      );
+      return;
+    }
+
     try {
-      const cleanUser = usernameInput.trim();
-      const cleanPass = passwordInput.trim();
-
-      let userHash = "";
-      let passHash = "";
-      try {
-        userHash = await hashString(cleanUser);
-        passHash = await hashString(cleanPass);
-      } catch {
-        // Fall back gracefully if subtle crypto fails
-      }
-
-      const isValidUser =
-        cleanUser === "8303975943" ||
-        userHash === "07b36ee8e6a81d895327eeda6cfdcc5416a0ccd38ee94e2080076827ecb85bf4";
-
-      const validPassHashes = [
-        "075b098aa184e3a01fbbc6faed0c882f563ec6aaba05808e6b4db2b46299ae1c", // 8303975943Anujshahdeo
-        "4ad4bf68063a83d7a2261b6286433bf2399ac5f3b3d03b11a90f631506c89093", // 8303975943AnujShahdeo
-        "b9b8279b99bec93b5a2b45b660483f0bccb1b7471269b8e5c2e88efad4389c69", // 8303975943anujshahdeo
-        "4716616fbf7a3f1e8f24beeebc3070d33db57bb9eb59b663ee56d58a224e035e"  // original hash
-      ];
-
-      const isValidPass =
-        cleanPass.toLowerCase() === "8303975943anujshahdeo" ||
-        validPassHashes.includes(passHash);
-
-      if (isValidUser && isValidPass) {
-        setIsAuthenticated(true);
-        sessionStorage.setItem("admin_authenticated", "true");
-        setLoginError(null);
-        triggerToast("Access Granted. Secure Session Established.");
-      } else {
-        setLoginError("Invalid Administrator Credentials. Access Denied.");
-      }
+      await signInWithEmailAndPassword(
+        auth,
+        emailInput.trim(),
+        passwordInput
+      );
+      setPasswordInput("");
+      triggerToast("Access Granted. Secure Session Established.");
     } catch (err) {
-      setLoginError("Authentication error. Secure context required.");
+      const code =
+        err instanceof Error && "code" in err
+          ? (err as { code?: string }).code
+          : undefined;
+      if (
+        code === "auth/invalid-credential" ||
+        code === "auth/user-not-found" ||
+        code === "auth/wrong-password" ||
+        code === "auth/invalid-email"
+      ) {
+        setLoginError("Invalid Administrator Credentials. Access Denied.");
+      } else if (code === "auth/too-many-requests") {
+        setLoginError("Too many failed attempts. Please try again later.");
+      } else if (code === "auth/network-request-failed") {
+        setLoginError("Network error. Please check your connection and retry.");
+      } else {
+        setLoginError("Authentication error. Please try again.");
+      }
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    sessionStorage.removeItem("admin_authenticated");
-    setUsernameInput("");
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+    }
+    setEmailInput("");
     setPasswordInput("");
     triggerToast("Logged out of Admin Session.");
   };
@@ -558,6 +569,11 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
           <div className="flex items-center gap-2">
             {isAuthenticated && (
               <>
+                {userEmail && (
+                  <span className="px-2.5 py-1 bg-white/10 text-white font-sans text-xs rounded-full">
+                    {userEmail}
+                  </span>
+                )}
                 <button
                   onClick={handleLogout}
                   className="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-sans text-xs font-semibold rounded-full flex items-center gap-1.5 transition-all cursor-pointer"
@@ -587,7 +603,14 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
         </div>
 
         {/* Portal Workspace (Sidebar Nav + Main Editor Forms) */}
-        {!isAuthenticated ? (
+        {isAuthLoading ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 bg-surface-theme">
+            <Loader2 className="w-8 h-8 animate-spin text-secondary-theme" />
+            <p className="mt-4 font-sans text-xs text-text-variant">
+              Checking admin session…
+            </p>
+          </div>
+        ) : !isAuthenticated ? (
           <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 bg-surface-theme overflow-y-auto">
             <form onSubmit={handleLogin} className="w-full max-w-md border border-border-theme/40 bg-bg-theme p-6 md:p-8 shadow-lg  rounded-xl space-y-6">
               <div className="text-center space-y-2">
@@ -610,18 +633,18 @@ Generated from Creative Portfolio Template on ${new Date().toLocaleDateString()}
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <label className="block font-sans text-[10px] font-bold  tracking-wider text-text-theme">
-                    Username
+                    Admin Email
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-text-variant">
                       <User className="w-4 h-4" />
                     </span>
                     <input
-                      type="text"
+                      type="email"
                       required
-                      value={usernameInput}
-                      onChange={(e) => setUsernameInput(e.target.value)}
-                      placeholder="Enter administrator username"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="Enter administrator email"
                       className="w-full pl-9 pr-3 py-2.5 border border-border-theme/40 bg-surface-theme font-sans text-xs text-text-theme rounded-xl focus:outline-none focus:ring-0 focus:border-primary-theme"
                     />
                   </div>

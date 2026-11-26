@@ -15,6 +15,7 @@ import Photography from "./components/Photography";
 import ResumePreview from "./components/ResumePreview";
 import { DEFAULT_PORTFOLIO_DATA } from "./defaultData";
 import { PortfolioData } from "./types";
+import { firebaseDatabaseUrl, getAdminIdToken } from "./firebase";
 
 export default function App() {
   const [isDark, setIsDark] = useState(false);
@@ -25,7 +26,10 @@ export default function App() {
   const [portfolioData, setPortfolioData] = useState<PortfolioData>(DEFAULT_PORTFOLIO_DATA);
   const [isLoading, setIsLoading] = useState(true);
 
-  const FIREBASE_URL = "https://portfolio-for-all-9fdc3-default-rtdb.firebaseio.com/portfolio.json";
+  // Public read: visitors load the portfolio without signing in, so the
+  // GET stays unauthenticated. Writes (save/reset below) are different —
+  // they attach the signed-in admin's Firebase Auth ID token.
+  const FIREBASE_URL = `${firebaseDatabaseUrl}/portfolio.json`;
 
   // Load portfolio template data from Firebase
   useEffect(() => {
@@ -76,9 +80,12 @@ export default function App() {
     setIsDark((prev) => !prev);
   };
 
-  // Save changes from Admin Portal to Firebase
+  // Save changes from Admin Portal to Firebase. Requires the admin to be
+  // signed in: the Firebase Auth ID token is sent as `?auth=<token>`, and
+  // the database rules (`.write: "auth != null"`) reject anyone else.
   const handleSavePortfolioData = async (newData: PortfolioData) => {
-    const res = await fetch(FIREBASE_URL, {
+    const token = await getAdminIdToken();
+    const res = await fetch(`${FIREBASE_URL}?auth=${token}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
@@ -91,9 +98,10 @@ export default function App() {
     setPortfolioData(newData);
   };
 
-  // Reset to default template on Firebase
+  // Reset to default template on Firebase (admin-only, same as save).
   const handleResetPortfolioData = async () => {
-    const res = await fetch(FIREBASE_URL, {
+    const token = await getAdminIdToken();
+    const res = await fetch(`${FIREBASE_URL}?auth=${token}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
